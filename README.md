@@ -43,9 +43,11 @@ e) Greedy search with at least two heuristics.
 f) A∗
 search with at least two admissible heuristics.
 
-TLDR: We want to use a search agent to delete all enemies (walkers) off of a NxM randomly generated 2d grid that also contains weapons (shards) and immovable obstacles. The agent is able to kill the walkers by being adjacent to them and expending one of his shards. Expending a shard kills all walkers in adjacent cells. Max shards the agent can carry at any time is 2-5 shards but constant during a run. The agent can also interact with Shard depositories on the grid by being adjacent to them to replenish his shard count to max. The agent starts with zero shards in his inventory. The agent can’t move diagonally. The agent always starts in the bottom right corner of the grid.  Once the map has no walkers the problem is considered solved. The agent employs the different search strategies above.
+# TLDR
 
-HOW TO RUN:
+ We want to use a search agent to delete all enemies (walkers) off of a NxM randomly generated 2d grid that also contains weapons (shards) and immovable obstacles. The agent is able to kill the walkers by being adjacent to them and expending one of his shards. Expending a shard kills all walkers in adjacent cells. Max shards the agent can carry at any time is 2-5 shards but constant during a run. The agent can also interact with Shard depositories on the grid by being adjacent to them to replenish his shard count to max. The agent starts with zero shards in his inventory. The agent can’t move diagonally. The agent always starts in the bottom right corner of the grid.  Once the map has no walkers the problem is considered solved. The agent employs the different search strategies above.
+
+# HOW TO RUN:
 Import the project to your Java IDE and make sure your memory parameter is set high enough to handle bigger boards without running out of memory otherwise stick with 4x4 boards max.
 Go to “GOTMain” class, in the main method, and call the “Search” Function as defined below.  The first parameter is the grid (you can select one of the static ones made above in the main method or create a random one with the GenerateGrid() method). The 2nd parameter is the search type and the final parameter is visualization. 
 If the visualization is set to true, the output will be shown in console. 

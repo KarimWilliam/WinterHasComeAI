@@ -18,12 +18,10 @@ public class GOTMain {
 		String[][] testGrid5=  {{"W","W","F","F","W"}, {"W","F","F","F","F"}, {"F","W","D","F","W"}, {"W","F","F","O","F"},{"W","F","D","F","J"} };
 		String[][] testGrid6=  {{"F","F","F","D","W"}, {"F","F","F","F","F"}, {"F","O","D","F","W"}, {"F","F","F","F","F"},{"W","F","D","F","J"} };// easy?
 		String[][] testGrid7=  {{"W","W","W","W"}, {"W","W","W","W"}, {"W","W","D","W"}, {"F","W","F","J"} };
-		String[][] testGrid8=  {{"W","W","W","W"}, {"W","W","W","W"}, {"W","W","W","W"}, {"W","D","F","J"} };
-		String[][] testGrid9=  {{"F","O","W","D"}, {"O","W","F","F"}, {"W","O","W","O"}, {"W","F","F","F"},{"D","F","D","J"} };
-		String[][] testGrid10=  {{"W","W","W","D"}, {"W","F","F","F"}, {"F","O","D","F"}, {"W","F","F","J"} };
+		String[][] testGrid8=  {{"D","W","W","W"}, {"F","F","F","W"}, {"F","D","O","F"}, {"J","F","F","W"} };
 		
 		String[][] GG = GenerateGrid(5, 4);
-		FinalReturn FR= Search(testGrid5,"BF",true);
+		FinalReturn FR= Search(testGrid5,"UC",true);
 
 	}
 
@@ -144,11 +142,9 @@ System.out.println("Jon has  " + c.state2 + " shard(s)");
 		SimpleShowGrid(grid); System.out.println();
 		SearchTreeNode TestNode = new SearchTreeNode(null, "", 0, 0 , grid,0,0);
 		SearchReturnType Result = null;
-		LinkedList<SearchTreeNode> STN = new LinkedList<SearchTreeNode>();
+		ArrayList<SearchTreeNode> STN = new ArrayList<SearchTreeNode>();
 		STN.add(TestNode);
-		int rn=new Random().nextInt(5)+2;
-		System.out.println("Jon can carry a max of "+rn+ " shard(s) \n");
-		Result = SaveWesteros.Search(STN,1,strategy,1,rn);
+		Result = SaveWesteros.Search(STN,0,strategy,1);
 
 
 		if(visualize) {

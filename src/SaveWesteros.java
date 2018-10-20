@@ -1,3 +1,4 @@
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
 
@@ -60,7 +61,7 @@ public class SaveWesteros extends GenericSearchProblem {
 		return Result;
 	}
 
-	// the 2nd Heuristic function: Manhattan for closest goal 
+	// the 2nd Heuristic function: Manhattan for closest goal + dynamic goal
 	public static int SetHeuristic2(String[][] Grid, int wep, int i, int j) {
 
 		int ResultW = 100;
@@ -79,26 +80,32 @@ public class SaveWesteros extends GenericSearchProblem {
 			}
 
 		}
-		if (wep > 0 )
+		if (wep == 3 || wep == 2)
 			return ResultW;
-		else
+		if (wep == 0)
 			return ResultD;
+		if (wep == 1) {
+			if (ResultD > ResultW)
+				return ResultW;
+		} else
+			return ResultD;
+		return ResultW;
 	}
 
 	// STN = parent Node, Count = how many nodes have been evaluated, SType = search
 	// strategy
 	// TargetDepth = Target Depth for IDS Search
-	public static SearchReturnType Search(LinkedList<SearchTreeNode> STN, int count, String SType, int TargetDepth, int CarryCapacity) {
+	public static SearchReturnType Search(ArrayList<SearchTreeNode> STN, int count, String SType, int TargetDepth) {
 
 		// if the queue is empty return failure
-		if (STN.peek() == null) {
+		if (STN.get(0) == null) {
 			System.out.println("No solution found");
 			return null;
 		}
 
-		String[][] CState = STN.peek().state1.clone();
+		String[][] CState = STN.get(0).state1.clone();
 		for (int i = 0; i < CState.length; i++) {
-			CState[i] = STN.peek().state1[i].clone();
+			CState[i] = STN.get(0).state1[i].clone();
 		}
 		int jonJ = 0;
 		int jonI = 0;
@@ -107,7 +114,7 @@ public class SaveWesteros extends GenericSearchProblem {
 
 		// if top node on queue has no walkers return that node
 		if (Arrays.deepToString(CState).contains("W") == false) {
-			SearchReturnType Res = new SearchReturnType(STN.peek(), count);
+			SearchReturnType Res = new SearchReturnType(STN.get(0), count);
 			return Res;
 		}
 
@@ -137,8 +144,8 @@ public class SaveWesteros extends GenericSearchProblem {
 				}
 				R[jonI][jonJ] = "F";
 				R[jonI][jonJ + 1] = "J";
-				A = new SearchTreeNode(STN.peek(), "Right", STN.peek().depth + 1, STN.peek().pathCost + moveCost, R,
-						STN.peek().state2, 0);
+				A = new SearchTreeNode(STN.get(0), "Right", STN.get(0).depth + 1, STN.get(0).pathCost + moveCost, R,
+						STN.get(0).state2, 0);
 			}
 		}
 
@@ -152,8 +159,8 @@ public class SaveWesteros extends GenericSearchProblem {
 				}
 				L[jonI][jonJ] = "F";
 				L[jonI][jonJ - 1] = "J";
-				B = new SearchTreeNode(STN.peek(), "Left", STN.peek().depth + 1, STN.peek().pathCost + moveCost, L,
-						STN.peek().state2, 0);
+				B = new SearchTreeNode(STN.get(0), "Left", STN.get(0).depth + 1, STN.get(0).pathCost + moveCost, L,
+						STN.get(0).state2, 0);
 			}
 		}
 
@@ -167,8 +174,8 @@ public class SaveWesteros extends GenericSearchProblem {
 				}
 				U[jonI][jonJ] = "F";
 				U[jonI - 1][jonJ] = "J";
-				C = new SearchTreeNode(STN.peek(), "Up", STN.peek().depth + 1, STN.peek().pathCost + moveCost, U,
-						STN.peek().state2, 0);
+				C = new SearchTreeNode(STN.get(0), "Up", STN.get(0).depth + 1, STN.get(0).pathCost + moveCost, U,
+						STN.get(0).state2, 0);
 			}
 		}
 
@@ -182,13 +189,13 @@ public class SaveWesteros extends GenericSearchProblem {
 				}
 				Do[jonI][jonJ] = "F";
 				Do[jonI + 1][jonJ] = "J";
-				D = new SearchTreeNode(STN.peek(), "Down", STN.peek().depth + 1, STN.peek().pathCost + moveCost, Do,
-						STN.peek().state2, 0);
+				D = new SearchTreeNode(STN.get(0), "Down", STN.get(0).depth + 1, STN.get(0).pathCost + moveCost, Do,
+						STN.get(0).state2, 0);
 			}
 		}
 
 		// Make KILL node
-		if ((up == "W" || down == "W" || right == "W" || left == "W") && STN.peek().state2 > 0) {
+		if ((up == "W" || down == "W" || right == "W" || left == "W") && STN.get(0).state2 > 0) {
 			String[][] newState = CState.clone();
 			for (int i = 0; i < newState.length; i++) {
 				newState[i] = CState[i].clone();
@@ -203,8 +210,8 @@ public class SaveWesteros extends GenericSearchProblem {
 			if (left == "W")
 				newState[jonI][jonJ - 1] = "F";
 
-			E = new SearchTreeNode(STN.peek(), "Kill", STN.peek().depth + 1, STN.peek().pathCost + KillCost, newState,
-					STN.peek().state2 - 1, 0);
+			E = new SearchTreeNode(STN.get(0), "Kill", STN.get(0).depth + 1, STN.get(0).pathCost + KillCost, newState,
+					STN.get(0).state2 - 1, 0);
 
 			if (Arrays.deepToString(newState).contains("W") == false) {
 				SearchReturnType Res = new SearchReturnType(E, count);
@@ -213,12 +220,12 @@ public class SaveWesteros extends GenericSearchProblem {
 		}
 
 		//Make Pickup node
-		if ((up == "D" || down == "D" || right == "D" || left == "D") && STN.peek().state2 < 3) {
+		if ((up == "D" || down == "D" || right == "D" || left == "D") && STN.get(0).state2 < 3) {
 			String[][] newState2 = CState.clone();
 			for (int i = 0; i < newState2.length; i++) {
 				newState2[i] = CState[i].clone();
 			}
-			F = new SearchTreeNode(STN.peek(), "PickUp", STN.peek().depth + 1, STN.peek().pathCost + PickipCost, newState2, CarryCapacity,
+			F = new SearchTreeNode(STN.get(0), "PickUp", STN.get(0).depth + 1, STN.get(0).pathCost + PickipCost, newState2, 3,
 					0);
 		}
 
@@ -237,11 +244,11 @@ public class SaveWesteros extends GenericSearchProblem {
 				STN.add(E);
 			if (F != null)
 				STN.add(F);
-			STN.remove(); // pop the queue
+			STN.remove(0); // pop the queue
 			count++;
 
 		} else if (SType == "UC") {
-			STN.remove(); // pop the queue
+			STN.remove(0); // pop the queue
 
 
 			// Uniform Cost Search
@@ -251,8 +258,8 @@ public class SaveWesteros extends GenericSearchProblem {
 					STN.add(E);
 				} else {
 					for (int i = 0; i < STN.size(); i++) {
-						if (STN.size() == i + 1 || E.pathCost >= STN.peekLast().pathCost) {
-							STN.addLast(E);
+						if (STN.size() == i + 1 || E.pathCost >= STN.get(STN.size()-1).pathCost) {
+							STN.add(E);
 							break;
 						}
 						if (E.pathCost < STN.get(i).pathCost) {
@@ -269,8 +276,8 @@ public class SaveWesteros extends GenericSearchProblem {
 					STN.add(F);
 				} else {
 					for (int i = 0; i < STN.size(); i++) {
-						if (STN.size() == i + 1 || F.pathCost >=STN.peekLast().pathCost) {
-							STN.addLast(F);
+						if (STN.size() == i + 1 || F.pathCost >=STN.get(STN.size()-1).pathCost) {
+							STN.add(F);
 							break;
 						}
 						if (F.pathCost < STN.get(i).pathCost) {
@@ -287,8 +294,8 @@ public class SaveWesteros extends GenericSearchProblem {
 					STN.add(A);
 				} else {
 					for (int i = 0; i < STN.size(); i++) {
-						if (STN.size() == i + 1 || A.pathCost >= STN.peekLast().pathCost) {
-							STN.addLast(A);
+						if (STN.size() == i + 1 || A.pathCost >= STN.get(STN.size()-1).pathCost) {
+							STN.add(A);
 							break;
 						}
 						if (A.pathCost < STN.get(i).pathCost) {
@@ -306,8 +313,8 @@ public class SaveWesteros extends GenericSearchProblem {
 					STN.add(B);
 				} else {
 					for (int i = 0; i < STN.size(); i++) {
-						if (STN.size() == i + 1 || B.pathCost >= STN.peekLast().pathCost) {
-							STN.addLast(B);
+						if (STN.size() == i + 1 || B.pathCost >= STN.get(STN.size()-1).pathCost) {
+							STN.add(B);
 							break;
 						}
 						if (B.pathCost < STN.get(i).pathCost) {
@@ -325,8 +332,8 @@ public class SaveWesteros extends GenericSearchProblem {
 					STN.add(C);
 				} else {
 					for (int i = 0; i < STN.size(); i++) {
-						if (STN.size() == i + 1 || C.pathCost >= STN.peekLast().pathCost) {
-							STN.addLast(C);
+						if (STN.size() == i + 1 || C.pathCost >= STN.get(STN.size()-1).pathCost) {
+							STN.add(C);
 							break;
 						}
 						if (C.pathCost < STN.get(i).pathCost) {
@@ -344,8 +351,8 @@ public class SaveWesteros extends GenericSearchProblem {
 					STN.add(D);
 				} else {
 					for (int i = 0; i < STN.size(); i++) {
-						if (STN.size() == i + 1 || D.pathCost >=STN.peekLast().pathCost) {
-							STN.addLast(D);
+						if (STN.size() == i + 1 || D.pathCost >=STN.get(STN.size()-1).pathCost) {
+							STN.add(D);
 							break;
 						}
 						if (D.pathCost < STN.get(i).pathCost) {
@@ -361,47 +368,46 @@ public class SaveWesteros extends GenericSearchProblem {
 			
 		// Depth First Search
 		} else if (SType == "DF") {
-			count++;
-			STN.remove(); // pop the queue
+
+			STN.remove(0); // pop the queue
 
 			if (A != null && CheckAnc(A.parentNode, A.state1, A.state2))
-				STN.addFirst(A);
+				STN.add(0, A);
 			if (B != null && CheckAnc(B.parentNode, B.state1, B.state2))
-				STN.addFirst(B);
+				STN.add(0,B);
 			if (C != null && CheckAnc(C.parentNode, C.state1, C.state2))
-				STN.addFirst(C);
+				STN.add(0,C);
 			if (D != null && CheckAnc(D.parentNode, D.state1, D.state2))
-				STN.addFirst(D);
-			if (F != null)
-				STN.addFirst(F);
+				STN.add(0,D);
 			if (E != null)
-				STN.addFirst(E);
+				STN.add(0,E);
+			if (F != null)
+				STN.add(0,F);
 
-
-			
+			count++;
 
 		} else if (SType == "ID") {
 
 			
 
-				SearchTreeNode x= STN.remove(); // pop the queue
+				SearchTreeNode x= STN.remove(0); // pop the queue
 
 				if (A != null && CheckAnc(A.parentNode, A.state1, A.state2) && TargetDepth>=A.depth)
-					STN.addFirst(A);
+					STN.add(0, A);
 				if (B != null && CheckAnc(B.parentNode, B.state1, B.state2)&& TargetDepth>=B.depth)
-					STN.addFirst(B);
+					STN.add(0, B);
 				if (C != null && CheckAnc(C.parentNode, C.state1, C.state2)&& TargetDepth>=C.depth)
-					STN.addFirst(C);
+					STN.add(0, C);
 				if (D != null && CheckAnc(D.parentNode, D.state1, D.state2)&& TargetDepth>=D.depth)
-					STN.addFirst(D);
+					STN.add(0, D);
 				if (E != null && TargetDepth>=E.depth)
-					STN.addFirst(E);
+					STN.add(0, E);
 				if (F != null && TargetDepth>=F.depth)
-					STN.addFirst(F);
+					STN.add(0, F);
 
 				count++;
 				if (!STN.isEmpty()) {
-				return Search(STN, count, SType, TargetDepth,CarryCapacity); // consider the next node in the front of the queue
+				return Search(STN, count, SType, TargetDepth); // consider the next node in the front of the queue
 
 			} else {
 				TargetDepth++;
@@ -410,14 +416,14 @@ public class SaveWesteros extends GenericSearchProblem {
 				STN.clear();
 				// System.out.println(root.);
 				STN.add(root);
-				return Search(STN, count, SType, TargetDepth,CarryCapacity);
+				return Search(STN, count, SType, TargetDepth);
 			}
 
 			
 			// GREEDY SEARCH & A*
 			// For killing and picking weapons adjacent to Jon H=0;
 		} else if ((SType == "GR1") || (SType == "GR2") || (SType == "AS1" || SType == "AS2")) {
-			STN.remove(); // pop the queue
+			STN.remove(0); // pop the queue
 
 			if (E != null) {
 				if (SType == "AS1" || SType == "AS2")
@@ -428,7 +434,7 @@ public class SaveWesteros extends GenericSearchProblem {
 				} else {
 					for (int i = 0; i < STN.size(); i++) {
 						if (STN.size() == i + 1 || E.heuristic >= STN.get(STN.size() - 1).heuristic) {
-							STN.addLast(E);
+							STN.add(E);
 							break;
 						}
 						if (E.heuristic < STN.get(i).heuristic) {
@@ -448,7 +454,7 @@ public class SaveWesteros extends GenericSearchProblem {
 				} else {
 					for (int i = 0; i < STN.size(); i++) {
 						if (STN.size() == i + 1 || F.heuristic >= STN.get(STN.size() - 1).heuristic) {
-							STN.addLast(F);
+							STN.add(F);
 							break;
 						}
 						if (F.heuristic < STN.get(i).heuristic) {
@@ -473,7 +479,7 @@ public class SaveWesteros extends GenericSearchProblem {
 				} else {
 					for (int i = 0; i < STN.size(); i++) {
 						if (STN.size() == i + 1 || A.heuristic >= STN.get(STN.size() - 1).heuristic) {
-							STN.addLast(A);
+							STN.add(A);
 							break;
 						}
 						if (A.heuristic < STN.get(i).heuristic) {
@@ -499,7 +505,7 @@ public class SaveWesteros extends GenericSearchProblem {
 				} else {
 					for (int i = 0; i < STN.size(); i++) {
 						if (STN.size() == i + 1 || B.heuristic >= STN.get(STN.size() - 1).heuristic) {
-							STN.addLast(B);
+							STN.add(B);
 							break;
 						}
 						if (B.heuristic < STN.get(i).heuristic) {
@@ -525,7 +531,7 @@ public class SaveWesteros extends GenericSearchProblem {
 				} else {
 					for (int i = 0; i < STN.size(); i++) {
 						if (STN.size() == i + 1 || C.pathCost >= STN.get(STN.size() - 1).pathCost) {
-							STN.addLast(C);
+							STN.add(C);
 							break;
 						}
 						if (C.pathCost < STN.get(i).pathCost) {
@@ -551,7 +557,7 @@ public class SaveWesteros extends GenericSearchProblem {
 				} else {
 					for (int i = 0; i < STN.size(); i++) {
 						if (STN.size() == i + 1 || D.heuristic >= STN.get(STN.size() - 1).heuristic) {
-							STN.addLast(D);
+							STN.add(D);
 							break;
 						}
 						if (D.heuristic < STN.get(i).heuristic) {
@@ -565,7 +571,7 @@ public class SaveWesteros extends GenericSearchProblem {
 			count++;
 		}
 
-		return Search(STN, count, SType, 0,CarryCapacity); // consider the next node in the front of the queue
+		return Search(STN, count, SType, 0); // consider the next node in the front of the queue
 	}
 
 }
